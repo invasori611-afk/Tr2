@@ -1,1 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trindade Editor Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #ffd700;
+            --dark: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.1);
+            --success: #2ecc71;
+        }
 
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--dark);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+        }
+
+        /* --- TELA DE INTRO --- */
+        #intro-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            background: var(--dark);
+        }
+
+        .tridente {
+            position: absolute;
+            width: 220px;
+            fill: var(--gold);
+            opacity: 0;
+            animation: surgeTridente 2s ease-out forwards;
+        }
+
+        .nome {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            text-shadow: 0 0 20px var(--gold);
+            opacity: 0;
+            animation: surgeNome 1.5s ease-out 1s forwards;
+            z-index: 2;
+        }
+
+        .btn-editar {
+            margin-top: 40px;
+            padding: 12px 40px;
+            border: 2px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 30px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: surgeBotao 1s ease-out 2.5s forwards;
+            transition: 0.3s;
+            z-index: 3;
+        }
+
+        /* --- PAINEL DE EDIÇÃO --- */
+        #editor-panel {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            visibility: hidden;
+            position: relative;
+        }
+
+        .preview-container {
+            width: 100%;
+            max-width: 350px;
+            height: 250px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .preview-content {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s filter;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .filter-btn {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .active-filter { border-color: var(--gold); color: var(--gold); background: rgba(255, 215, 0, 0.1); }
+
+        /* --- BOTÃO ABAIXAR (DOWNLOAD) --- */
+        .btn-download {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background: var(--gold);
+            color: black;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+            font-weight: bold;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.3s;
+        }
+
+        .btn-download:active { transform: scale(0.9); }
+
+        /* Icone de download */
+        .btn-download svg {
+            width: 24px;
+            margin-bottom: 2px;
+        }
+
+        /* --- ANIMAÇÕES --- */
+        @keyframes surgeTridente {
+            0% { opacity: 0; transform: scale(0.5) translateY(50px); filter: blur(10px); }
+            100% { opacity: 0.3; transform: scale(1.1) translateY(0); filter: blur(2px); }
+        }
+        @keyframes surgeNome {
+            0% { opacity: 0; letter-spacing: 20px; }
+            100% { opacity: 1; letter-spacing: 8px; }
+        }
+        @keyframes surgeBotao {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hide-intro { transform: translateY(-100%); }
+
+        /* Estilo do label "Abaixar" */
+        .download-label {
+            position: absolute;
+            bottom: -5px;
+            font-size: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <svg class="tridente" viewBox="0 0 512 512">
+            <path d="M448 32h-16c-8.8 0-16 7.2-16 16v96c0 53-43 96-96 96s-96-43-96-96V48c0-8.8-7.2-16-16-16h-16c-8.8 0-16 7.2-16 16v96c0 53-43 96-96 96s-96-43-96-96V48c0-8.8-7.2-16-16-16H64c-8.8 0-16 7.2-16 16v96c0 84.4 65.4 153.6 148.1 159.5L192 480c0 17.7 14.3 32 32 32h64c17.7 0 32-14.3 32-32V303.5c82.7-5.9 148.1-75.1 148.1-159.5V48c0-8.8-7.2-16-16-16z"/>
+        </svg>
+        <h1 class="nome">Trindade</h1>
+        <button class="btn-editar" onclick="abrirEditor()">Editar</button>
+    </div>
+
+    <div id="editor-panel">
+        <h2 style="margin-top: 10px; margin-bottom: 20px; font-family: 'Cinzel'; color: var(--gold); font-size: 1.2rem;">Studio Trindade</h2>
+        
+        <div class="preview-container">
+            <img id="main-preview" class="preview-content" src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&w=500&q=80" alt="Preview">
+        </div>
+
+        <div class="options-grid">
+            <div class="card">
+                <span style="font-size: 0.9rem; font-weight: bold;">FOTO</span>
+                <button class="filter-btn" onclick="aplicarFiltro('sepia(0.7) contrast(1.1) brightness(0.9)', 'Vintage')">Vintage</button>
+                <button class="filter-btn" onclick="aplicarFiltro('grayscale(1) contrast(1.5)', 'Noir')">Noir</button>
+            </div>
+            <div class="card">
+                <span style="font-size: 0.9rem; font-weight: bold;">VÍDEO</span>
+                <button class="filter-btn" onclick="aplicarFiltro('hue-rotate(200deg) saturate(1.8)', 'Cinemático')">Cinemático</button>
+                <button class="filter-btn" onclick="aplicarFiltro('brightness(1.3) blur(1px) saturate(0.8)', 'Dreamy')">Dreamy</button>
+            </div>
+        </div>
+
+        <p id="status-text" style="margin-top: 20px; font-size: 0.8rem; color: #888;">Nenhum filtro aplicado</p>
+
+        <button class="btn-download" onclick="baixarArquivo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span class="download-label">Abaixar</span>
+        </button>
+    </div>
+
+    <script>
+        function abrirEditor() {
+            document.getElementById('intro-screen').style.transform = 'translateY(-100%)';
+            document.getElementById('editor-panel').style.visibility = 'visible';
+        }
+
+        function aplicarFiltro(efeito, nome) {
+            const preview = document.getElementById('main-preview');
+            preview.style.filter = efeito;
+            
+            document.getElementById('status-text').innerText = "Filtro: " + nome;
+            document.getElementById('status-text').style.color = "var(--gold)";
+
+            const botoes = document.querySelectorAll('.filter-btn');
+            botoes.forEach(btn => btn.classList.remove('active-filter'));
+            event.target.classList.add('active-filter');
+        }
+
+        function baixarArquivo() {
+            const btn = document.querySelector('.btn-download');
+            const status = document.getElementById('status-text');
+            
+            // Simulação de processamento
+            btn.style.background = "#fff";
+            status.innerText = "Processando arquivo...";
+            
+            setTimeout(() => {
+                alert("Download iniciado! O arquivo 'Trindade_Edit.jpg' está sendo baixado com seus efeitos.");
+                btn.style.background = "var(--gold)";
+                status.innerText = "Concluído!";
+                status.style.color = "var(--success)";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
